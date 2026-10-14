@@ -13,12 +13,22 @@
   let clay = nn.create('audio')
     .addTo('body')
     .set('controls', you)
-    .set('src', base + "Saibo.mp3")
+    .set('src', "Saibo.mp3")
   
   let moon = nn.create('audio')
     .addTo('body')
     .set('controls', you)
     .set('src', base + "moon.mp3")
+  
+  let hey = nn.create('audio')
+    .addTo('body')
+    .set('controls', you)
+    .set('src', base + "moon.mp3")
+  
+  let saibo = nn.create('audio')
+    .addTo('body')
+    .set('controls', you)
+    .set('src', "Saibo.mp3")
 
   clay.rotate(3)
 
@@ -31,6 +41,10 @@
     if (e.key === "w") {
       moon.currentTime = 0
       moon.play()
+    }
+    if (e.key === "e") {
+      saibo.currentTime = 0
+      saibo.play()
     }
   }
   nn.on("keydown", play)
