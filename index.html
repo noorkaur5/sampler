@@ -1,7 +1,24 @@
-<body></body>
+<body>
+<div style="
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    font: 18px Georgia, serif;
+    border-radius: 6px;
+    z-index: 10;
+  ">
+    Press <br>
+    Q: drop a leaf<br>
+    W: change the tree<br>
+    E: gust of wind<br>
+    S: play a song
+  </div>
+</body>
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script>
-
   const url = 'https://storage.googleapis.com/cdn.patatap.com/A/'
 
   const clay = nn.create('audio')
@@ -14,15 +31,45 @@
     .set('preload', 'auto')
     .addTo('body')
 
+  const saibo = nn.create('audio')
+    .set('src', 'saibo-10sec.mp3')
+    .set('preload', 'auto')
+    .addTo('body')
+
+  const corona = nn.create('audio')
+    .set('src', 'corona.mp3')
+    .set('preload', 'auto')
+    .addTo('body')
+
   // background pictures: each has a file name and a caption saying where the tree is from
-  const backgrounds = [
-    { file: 'blackpanther_tree.webp', caption: 'Heart-shaped herb tree, Wakanda (Black Panther)' },
-    { file: 'chotabheem_tree.jpg',    caption: 'Dholakpur village, India (Chhota Bheem)' },
-    { file: 'willow_tree.png',        caption: 'Weeping willow, Harry Potter' },
-    { file: 'madagascar_tree.webp',   caption: 'Baobab tree, Madagascar' },
-    { file: 'sequoia_tree.webp',      caption: 'Giant sequoia, California, USA' },
-    { file: 'banyan_tree.jpg',        caption: 'Banyan tree, India' },
-    { file: 'phineas_tree.jpeg',      caption: 'The backyard tree, Danville (Phineas and Ferb)' }
+  const backgrounds = [{
+      file: 'blackpanther_tree.webp',
+      caption: 'Heart-shaped herb tree, Wakanda (Black Panther)'
+    },
+    {
+      file: 'chotabheem_tree.jpg',
+      caption: 'Dholakpur village, India (Chhota Bheem)'
+    },
+    {
+      file: 'willow_tree.png',
+      caption: 'Weeping willow, Harry Potter'
+    },
+    {
+      file: 'madagascar_tree.webp',
+      caption: 'Baobab tree, Madagascar'
+    },
+    {
+      file: 'sequoia_tree.webp',
+      caption: 'Giant sequoia, California, USA'
+    },
+    {
+      file: 'banyan_tree.jpg',
+      caption: 'Banyan tree, India'
+    },
+    {
+      file: 'phineas_tree.jpeg',
+      caption: 'The backyard tree, Danville (Phineas and Ferb)'
+    }
   ]
   let bgIndex = 0
 
@@ -33,7 +80,7 @@
     .css('background-position', 'center')
     .css('background-repeat', 'no-repeat')
     .css('min-height', '100vh')
-    .css('overflow', 'hidden')   // stops falling leaves from creating scrollbars
+    .css('overflow', 'hidden') // stops falling leaves from creating scrollbars
     .css('margin', 0)
 
   // caption in the bottom-left corner showing where the current tree is from
@@ -72,7 +119,11 @@
       .css('background', clr)
       .css('pointer-events', 'none')
 
-    const anim = overlay.animate([{ opacity: 0.5 }, { opacity: 0 }], {
+    const anim = overlay.animate([{
+      opacity: 0.5
+    }, {
+      opacity: 0
+    }], {
       duration: 800,
       easing: 'ease-out'
     })
@@ -81,12 +132,21 @@
 
   // "q" key: a little screen shake
   function shake () {
-    nn.get('body').animate([
-      { transform: 'translate(0, 0)' },
-      { transform: 'translate(-6px, 4px)' },
-      { transform: 'translate(6px, -4px)' },
-      { transform: 'translate(0, 0)' }
-    ], { duration: 200 })
+    nn.get('body').animate([{
+        transform: 'translate(0, 0)'
+      },
+      {
+        transform: 'translate(-6px, 4px)'
+      },
+      {
+        transform: 'translate(6px, -4px)'
+      },
+      {
+        transform: 'translate(0, 0)'
+      }
+    ], {
+      duration: 200
+    })
   }
 
   // a leaf: green gradient, shadow, grows in, drifts down while rotating, fades out
@@ -120,11 +180,26 @@
       fill: 'forwards' //makes it hold the final look
     }
     const c = 'translate(-50%, -50%)' //spot doesn't adjust to top left corner
-    const keyframes = [
-      { opacity: 0, transform: `${c} rotate(${rot}deg) scale(0)`, offset: 0 },
-      { opacity: 1, transform: `${c} rotate(${rot}deg) scale(1)`, offset: 0.15 },
-      { opacity: 1, transform: `translate(calc(-50% + ${sway / 2}px), calc(-50% + ${fall / 2}px)) rotate(${rot + 90}deg) scale(1)`, offset: 0.6 },
-      { opacity: 0, transform: `translate(calc(-50% + ${sway}px), calc(-50% + ${fall}px)) rotate(${rot + 180}deg) scale(1)`, offset: 1 }
+    const keyframes = [{
+        opacity: 0,
+        transform: `${c} rotate(${rot}deg) scale(0)`,
+        offset: 0
+      },
+      {
+        opacity: 1,
+        transform: `${c} rotate(${rot}deg) scale(1)`,
+        offset: 0.15
+      },
+      {
+        opacity: 1,
+        transform: `translate(calc(-50% + ${sway / 2}px), calc(-50% + ${fall / 2}px)) rotate(${rot + 90}deg) scale(1)`,
+        offset: 0.6
+      },
+      {
+        opacity: 0,
+        transform: `translate(calc(-50% + ${sway}px), calc(-50% + ${fall}px)) rotate(${rot + 180}deg) scale(1)`,
+        offset: 1
+      }
     ]
     const anim = leaf.animate(keyframes, timing)
     anim.onfinish = () => leaf.remove()
@@ -149,9 +224,14 @@
       for (let i = 0; i < 20; i++) {
         setTimeout(drop, i * 80)
       }
+    } else if (e.key === 's') {
+      saibo.currentTime = 0
+      saibo.play().catch(error => {
+        console.error('Saibo could not play:', error.name, error.message)
+      })
     }
+
   }
 
   nn.on('keypress', play)
-
 </script>
