@@ -1,52 +1,157 @@
 <body></body>
-<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library@1.0.1/build/nn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script>
-  let base = 'https://storage.googleapis.com/cdn.patatap.com/A/'
-  let you = true
 
-  // your JavaScript code here  
-  // this is how i change my <body>
+  const url = 'https://storage.googleapis.com/cdn.patatap.com/A/'
+
+  const clay = nn.create('audio')
+    .set('src', url + 'bubbles.mp3')
+    .set('preload', 'auto')
+    .addTo('body')
+
+  const flash = nn.create('audio')
+    .set('src', url + 'flash-1.mp3')
+    .set('preload', 'auto')
+    .addTo('body')
+
+  // background pictures: each has a file name and a caption saying where the tree is from
+  const backgrounds = [
+    { file: 'blackpanther_tree.webp', caption: 'Heart-shaped herb tree, Wakanda (Black Panther)' },
+    { file: 'chotabheem_tree.jpg',    caption: 'Dholakpur village, India (Chhota Bheem)' },
+    { file: 'willow_tree.png',        caption: 'Weeping willow, Harry Potter' },
+    { file: 'madagascar_tree.webp',   caption: 'Baobab tree, Madagascar' },
+    { file: 'sequoia_tree.webp',      caption: 'Giant sequoia, California, USA' },
+    { file: 'banyan_tree.jpg',        caption: 'Banyan tree, India' },
+    { file: 'phineas_tree.jpeg',      caption: 'The backyard tree, Danville (Phineas and Ferb)' }
+  ]
+  let bgIndex = 0
+
   nn.get('body')
-    .css('background', 'brown')
+    .css('background-color', 'pink')
+    .css('background-image', `url(${backgrounds[0].file})`)
+    .css('background-size', 'cover')
+    .css('background-position', 'center')
+    .css('background-repeat', 'no-repeat')
+    .css('min-height', '100vh')
+    .css('overflow', 'hidden')   // stops falling leaves from creating scrollbars
     .css('margin', 0)
 
-  let clay = nn.create('audio')
-    .addTo('body')
-    .set('controls', you)
-    .set('src', "Saibo.mp3")
-  
-  let moon = nn.create('audio')
-    .addTo('body')
-    .set('controls', you)
-    .set('src', base + "moon.mp3")
-  
-  let hey = nn.create('audio')
-    .addTo('body')
-    .set('controls', you)
-    .set('src', base + "moon.mp3")
-  
-  let saibo = nn.create('audio')
-    .addTo('body')
-    .set('controls', you)
-    .set('src', "Saibo.mp3")
+  // caption in the bottom-left corner showing where the current tree is from
+  const caption = document.createElement('div')
+  caption.textContent = backgrounds[0].caption
+  Object.assign(caption.style, {
+    position: 'fixed',
+    left: '20px',
+    bottom: '20px',
+    padding: '8px 14px',
+    background: 'rgba(0, 0, 0, 0.55)',
+    color: 'white',
+    fontFamily: 'Georgia, serif',
+    fontSize: '18px',
+    borderRadius: '6px',
+    zIndex: 10,
+    pointerEvents: 'none'
+  })
+  document.body.appendChild(caption)
 
-  clay.rotate(3)
+  // "w" key: switch to the next background picture and its caption,
+  // and flash a see-through color layer over it that fades away
+  function bgFlash () {
+    bgIndex = (bgIndex + 1) % backgrounds.length //moves to the next picture, the % makes it loop forever
+    nn.get('body').css('background-image', `url(${backgrounds[bgIndex].file})`)
+    caption.textContent = backgrounds[bgIndex].caption
 
+    const clr = nn.hsl(nn.random(0, 360), 60, 70)
+    const overlay = nn.create('div')
+      .addTo('body')
+      .css('position', 'fixed')
+      .css('top', 0)
+      .css('left', 0)
+      .css('width', '100vw')
+      .css('height', '100vh')
+      .css('background', clr)
+      .css('pointer-events', 'none')
+
+    const anim = overlay.animate([{ opacity: 0.5 }, { opacity: 0 }], {
+      duration: 800,
+      easing: 'ease-out'
+    })
+    anim.onfinish = () => overlay.remove()
+  }
+
+  // "q" key: a little screen shake
+  function shake () {
+    nn.get('body').animate([
+      { transform: 'translate(0, 0)' },
+      { transform: 'translate(-6px, 4px)' },
+      { transform: 'translate(6px, -4px)' },
+      { transform: 'translate(0, 0)' }
+    ], { duration: 200 })
+  }
+
+  // a leaf: green gradient, shadow, grows in, drifts down while rotating, fades out
+  function drop () {
+    // hue 70-160 is the green range; saturation and lightness vary the shade
+    const clr = nn.hsl(nn.random(70, 160), nn.random(40, 80), nn.random(25, 55))
+    const clrLight = nn.hsl(nn.random(70, 160), 70, 65)
+    const x = nn.random(nn.width) //random spot on the screen
+    const y = nn.random(nn.height) //random spot on the screen
+    const size = nn.random(30, 120) //leaf size in pixels
+    const rot = nn.random(0, 360) //starting rotation in degrees
+    const fall = nn.random(100, 300) // how far it drifts down
+    const sway = nn.random(-80, 80) // how far it drifts sideways
+
+    // a square with two opposite corners fully rounded looks like a leaf
+    const leaf = nn.create('div')
+      .addTo('body')
+      .css('position', 'absolute')
+      .css('left', x + 'px')
+      .css('top', y + 'px')
+      .css('width', size + 'px') //CSS needs this format
+      .css('height', size + 'px')
+      .css('background', `linear-gradient(135deg, ${clrLight}, ${clr})`)
+      .css('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.3)')
+      .css('border-radius', '0 100% 0 100%')
+      .css('pointer-events', 'none')
+
+    const timing = {
+      duration: 5000, // total life of leaf in milliseconds
+      easing: 'ease-out',
+      fill: 'forwards' //makes it hold the final look
+    }
+    const c = 'translate(-50%, -50%)' //spot doesn't adjust to top left corner
+    const keyframes = [
+      { opacity: 0, transform: `${c} rotate(${rot}deg) scale(0)`, offset: 0 },
+      { opacity: 1, transform: `${c} rotate(${rot}deg) scale(1)`, offset: 0.15 },
+      { opacity: 1, transform: `translate(calc(-50% + ${sway / 2}px), calc(-50% + ${fall / 2}px)) rotate(${rot + 90}deg) scale(1)`, offset: 0.6 },
+      { opacity: 0, transform: `translate(calc(-50% + ${sway}px), calc(-50% + ${fall}px)) rotate(${rot + 180}deg) scale(1)`, offset: 1 }
+    ]
+    const anim = leaf.animate(keyframes, timing)
+    anim.onfinish = () => leaf.remove()
+  }
+
+  // depending on which key we press
+  // a different visual and sound get triggered
   function play (e) {
-    if (e.key === "q") {
+    if (e.key === 'q') {
       clay.currentTime = 0
-      //when we're doing timing with numbers in code we usually think of miliseconds
       clay.play()
-    }
-    if (e.key === "w") {
-      moon.currentTime = 0
-      moon.play()
-    }
-    if (e.key === "e") {
-      saibo.currentTime = 0
-      saibo.play()
+      drop()
+      shake()
+    } else if (e.key === 'w') {
+      flash.currentTime = 0
+      flash.play()
+      bgFlash()
+    } else if (e.key === 'e') {
+      // gust of wind: 20 leaves, one every 80 milliseconds
+      clay.currentTime = 0
+      clay.play()
+      for (let i = 0; i < 20; i++) {
+        setTimeout(drop, i * 80)
+      }
     }
   }
-  nn.on("keydown", play)
-  //event string names are one of the rare cases where we dont use camel casing
+
+  nn.on('keypress', play)
+
 </script>
